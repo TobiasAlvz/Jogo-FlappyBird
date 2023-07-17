@@ -21,6 +21,34 @@ function Barreiras(reversa = false) {
 // b.setAltura(200);
 // document.querySelector("[tp-flappy]").appendChild(b.element);
 
-function parDeBarreiras(altura, abertura, x) {
-  this.element = newElement("div", "par-de-barreiras");
+class parDeBarreiras {
+  constructor(altura, abertura, x) {
+    this.element = newElement("div", "par-de-barreiras");
+
+    this.superior = new Barreiras(true);
+    this.inferior = new Barreiras(false);
+
+    this.element.appendChild(this.superior.element);
+    this.element.appendChild(this.inferior.element);
+
+    this.sorteio = () => {
+      const alturaSuperior = Math.random() * (altura - abertura);
+      const alturaInferior = altura - abertura - alturaSuperior;
+
+      this.superior.setAltura(alturaSuperior);
+      this.inferior.setAltura(alturaInferior);
+    };
+
+    this.getX = () => parent(this.element.style.left.split("px")[0]);
+
+    this.setX = (x) => (this.element.style.left = `${x}px`);
+
+    this.getLargura = () => this.element.clientWidth;
+
+    this.sorteio();
+    this.setX(x);
+  }
 }
+const b = new parDeBarreiras(700, 200, 800);
+
+document.querySelector("[tp-flappy]").appendChild(b.element);
