@@ -11,17 +11,12 @@ function Barreiras(reversa = false) {
   const corpo = newElement("div", "corpo");
 
   this.element.appendChild(reversa ? corpo : borda);
-
   this.element.appendChild(reversa ? borda : corpo);
 
   this.setAltura = (altura) => (corpo.style.height = `${altura}px`);
 }
 
-// const b = new Barreiras(true);
-// b.setAltura(200);
-// document.querySelector("[tp-flappy]").appendChild(b.element);
-
-class parDeBarreiras {
+class ParDeBarreiras {
   constructor(altura, abertura, x) {
     this.element = newElement("div", "par-de-barreiras");
 
@@ -39,7 +34,7 @@ class parDeBarreiras {
       this.inferior.setAltura(alturaInferior);
     };
 
-    this.getX = () => parent(this.element.style.left.split("px")[0]);
+    this.getX = () => parseInt(this.element.style.left.split("px")[0]);
 
     this.setX = (x) => (this.element.style.left = `${x}px`);
 
@@ -49,6 +44,6 @@ class parDeBarreiras {
     this.setX(x);
   }
 }
-const b = new parDeBarreiras(700, 200, 800);
 
+const b = new ParDeBarreiras(700, 200, 800);
 document.querySelector("[tp-flappy]").appendChild(b.element);
