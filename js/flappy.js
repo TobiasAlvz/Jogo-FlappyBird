@@ -4,46 +4,82 @@ function newElement(tagName, className) {
   return element;
 }
 
-function Barreiras(reversa = false) {
-  this.element = newElement("div", "barreira");
+function Obstacle(reverse = false) {
+  this.element = newElement("div", "obstacle");
 
-  const borda = newElement("div", "borda");
-  const corpo = newElement("div", "corpo");
+  const border = newElement("div", "border");
+  const body = newElement("div", "body");
 
-  this.element.appendChild(reversa ? corpo : borda);
-  this.element.appendChild(reversa ? borda : corpo);
+  this.element.appendChild(reverse ? body : border);
+  this.element.appendChild(reverse ? border : body);
 
-  this.setAltura = (altura) => (corpo.style.height = `${altura}px`);
+  this.setHeight = (height) => (body.style.height = `${height}px`);
 }
 
-class ParDeBarreiras {
-  constructor(altura, abertura, x) {
-    this.element = newElement("div", "par-de-barreiras");
+class PairOfObstacles {
+  constructor(height, opening, x) {
+    this.element = newElement("div", "pair-of-obstacles");
 
-    this.superior = new Barreiras(true);
-    this.inferior = new Barreiras(false);
+    this.upper = new Obstacle(true);
+    this.lower = new Obstacle(false);
 
-    this.element.appendChild(this.superior.element);
-    this.element.appendChild(this.inferior.element);
+    this.element.appendChild(this.upper.element);
+    this.element.appendChild(this.lower.element);
 
-    this.sorteio = () => {
-      const alturaSuperior = Math.random() * (altura - abertura);
-      const alturaInferior = altura - abertura - alturaSuperior;
+    this.randomize = () => {
+      const upperHeight = Math.random() * (height - opening);
+      const lowerHeight = height - opening - upperHeight;
 
-      this.superior.setAltura(alturaSuperior);
-      this.inferior.setAltura(alturaInferior);
+      this.upper.setHeight(upperHeight);
+      this.lower.setHeight(lowerHeight);
     };
 
     this.getX = () => parseInt(this.element.style.left.split("px")[0]);
 
     this.setX = (x) => (this.element.style.left = `${x}px`);
 
-    this.getLargura = () => this.element.clientWidth;
+    this.getWidth = () => this.element.clientWidth;
 
-    this.sorteio();
+    this.randomize();
     this.setX(x);
   }
 }
 
-const b = new ParDeBarreiras(700, 200, 800);
-document.querySelector("[tp-flappy]").appendChild(b.element);
+function ObstacleController(height, width, opening, spacing, notifyScore) {
+  this.obstacles = [
+    new PairOfObstacles(height, opening, width),
+    new PairOfObstacles(height, opening, width + spacing),
+    new PairOfObstacles(height, opening, width + spacing * 2),
+    new PairOfObstacles(height, opening, width + spacing * 3),
+  ];
+
+  const displacement = 3;
+
+  this.animate = () => {
+    this.obstacles.forEach((obstacle) => {
+      obstacle.setX(obstacle.getX() - displacement);
+
+      if (obstacle.getX() < -obstacle.getWidth()) {
+        obstacle.setX(obstacle.getX() + spacing * this.obstacles.length);
+        obstacle.randomize();
+      }
+
+      const middle = width / 2;
+      const crossedMiddle =
+        obstacle.getX() + displacement >= middle && obstacle.getX() <= middle;
+
+      if (crossedMiddle) notifyScore();
+    });
+  };
+}
+
+const obstacleController = new ObstacleController(700, 1200, 200, 400);
+
+const gameArea = document.querySelector("[tp-flappy]");
+obstacleController.obstacles.forEach((obstacle) =>
+  gameArea.appendChild(obstacle.element)
+);
+
+setInterval(() => {
+  obstacleController.animate();
+}, 20);
