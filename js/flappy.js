@@ -13,7 +13,7 @@ function Obstacle(reverse = false) {
   this.element.appendChild(reverse ? body : border);
   this.element.appendChild(reverse ? border : body);
 
-  this.setHeight = (height) => (body.style.height = `${height}px`);
+  this.setHeight = (height) => (body.style.height = `${height}pxx`);
 }
 
 class PairOfObstacles {
