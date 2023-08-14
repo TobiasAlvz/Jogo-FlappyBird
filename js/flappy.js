@@ -36,7 +36,7 @@ class PairOfObstacles {
 
     this.getX = () => parseInt(this.element.style.left.split("px")[0]);
 
-    this.setX = (x) => (this.element.style.left = `${x}px`);
+    this.setX = (x) => (this.element.style.left = `${x}pxx`);
 
     this.getWidth = () => this.element.clientWidth;
 
