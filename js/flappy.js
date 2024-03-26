@@ -1,115 +1,187 @@
-function newElement(tagName, className) {
-  const element = document.createElement(tagName);
-  element.className = className;
-  return element;
+function novoElemento(tagName, className) {
+  const elem = document.createElement(tagName);
+  elem.className = className;
+  return elem;
 }
 
-function Obstacle(reverse = false) {
-  this.element = newElement("div", "obstacle");
+function Barreira(reversa = false) {
+  this.elemento = novoElemento("div", "barreira");
 
-  const border = newElement("div", "border");
-  const body = newElement("div", "body");
+  const borda = novoElemento("div", "borda");
+  const corpo = novoElemento("div", "corpo");
 
-  this.element.appendChild(reverse ? body : border);
-  this.element.appendChild(reverse ? border : body);
+  this.elemento.appendChild(reversa ? corpo : borda);
+  this.elemento.appendChild(reversa ? borda : corpo);
 
-  this.setHeight = (height) => (body.style.height = `${height}px`);
+  this.setAltura = (altura) => (corpo.style.height = `${altura}px`);
 }
 
-class PairOfObstacles {
-  constructor(height, opening, x) {
-    this.element = newElement("div", "pair-of-obstacles");
 
-    this.upper = new Obstacle(true);
-    this.lower = new Obstacle(false);
+function ParDeBarreiras(altura, abertura, x) {
+  this.elemento = novoElemento("div", "par-de-barreiras");
 
-    this.element.appendChild(this.upper.element);
-    this.element.appendChild(this.lower.element);
+  this.superior = new Barreira(true);
+  this.inferior = new Barreira(false);
 
-    this.randomize = () => {
-      const upperHeight = Math.random() * (height - opening);
-      const lowerHeight = height - opening - upperHeight;
+  this.elemento.appendChild(this.superior.elemento);
+  this.elemento.appendChild(this.inferior.elemento);
 
-      this.upper.setHeight(upperHeight);
-      this.lower.setHeight(lowerHeight);
-    };
+  this.sortearAbertura = () => {
+    const alturaSuperior = Math.random() * (altura - abertura);
 
-    this.getX = () => parseInt(this.element.style.left.split("px")[0]);
+    const alturaInferior = altura - abertura - alturaSuperior;
 
-    this.setX = (x) => (this.element.style.left = `${x}px`);
+    this.superior.setAltura(alturaSuperior);
 
-    this.getWidth = () => this.element.clientWidth;
+    this.inferior.setAltura(alturaInferior);
+  };
 
-    this.randomize();
-    this.setX(x);
-  }
+  this.getX = () => parseInt(this.elemento.style.left.split("px")[0]);
+
+  this.setX = (x) => (this.elemento.style.left = `${x}px`);
+
+  this.getLargura = () => this.elemento.clientWidth;
+
+  this.sortearAbertura();
+  this.setX(x);
 }
 
-function ObstacleController(height, width, opening, spacing, notifyScore) {
-  this.obstacles = [
-    new PairOfObstacles(height, opening, width),
-    new PairOfObstacles(height, opening, width + spacing),
-    new PairOfObstacles(height, opening, width + spacing * 2),
-    new PairOfObstacles(height, opening, width + spacing * 3),
+
+function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
+  this.pares = [
+    new ParDeBarreiras(altura, abertura, largura),
+    new ParDeBarreiras(altura, abertura, largura + espaco),
+    new ParDeBarreiras(altura, abertura, largura + espaco * 2),
+    new ParDeBarreiras(altura, abertura, largura + espaco * 3),
   ];
 
-  const displacement = 3;
+  const deslocamento = 3;
 
-  this.animate = () => {
-    this.obstacles.forEach((obstacle) => {
-      obstacle.setX(obstacle.getX() - displacement);
+  this.animar = () => {
+    this.pares.forEach((par) => {
+      par.setX(par.getX() - deslocamento);
 
-      if (obstacle.getX() < -obstacle.getWidth()) {
-        obstacle.setX(obstacle.getX() + spacing * this.obstacles.length);
-        obstacle.randomize();
+      // quando o elemento sair da área do jogo
+      if (par.getX() < -par.getLargura()) {
+        par.setX(par.getX() + espaco * this.pares.length);
+        par.sortearAbertura();
       }
 
-      const middle = width / 2;
-      const crossedMiddle =
-        obstacle.getX() + displacement >= middle && obstacle.getX() <= middle;
-
-      if (crossedMiddle) notifyScore();
+      const meio = largura / 2;
+      const cruzouOMeio =
+        par.getX() + deslocamento >= meio && par.getX() < meio;
+      if (cruzouOMeio) notificarPonto();
     });
   };
 }
 
-function Bird(height) {
-  let flying = false;
+function Passaro(alturaJogo) {
+  let voando = false;
 
-  this.element = newElement("img", "bird");
-  this.element.src = "imagens/passaro.png";
+  this.elemento = novoElemento("img", "passaro");
+  this.elemento.src = "imagens/passaro.png";
 
-  this.getX = () => parseInt(this.element.style.bottom.split("px")[0]);
-  this.setY = (y) => (this.element.style.bottom = `${y}px`);
+  this.getY = () => parseInt(this.elemento.style.bottom.split("px")[0]);
+  this.setY = (y) => (this.elemento.style.bottom = `${y}px`);
 
-  window.onkeydown = (e) => (flying = true);
-  window.onkeyup = (e) => (flying = false);
+  window.onkeydown = (e) => (voando = true);
+  window.onkeyup = (e) => (voando = false);
 
-  this.animate = () => {
-    const newY = this.getX() + (flying ? 8 : -5);
-    const maxHeight = height - this.element.clientHeight;
+  this.animar = () => {
+    const novoY = this.getY() + (voando ? 8 : -5);
+    const alturaMaxima = alturaJogo - this.elemento.clientHeight;
 
-    if (newY <= 0) {
+    if (novoY <= 0) {
       this.setY(0);
-    } else if (newY >= maxHeight) {
-      this.setY(maxHeight);
+    } else if (novoY >= alturaMaxima) {
+      this.setY(alturaMaxima);
     } else {
-      this.setY(newY);
+      this.setY(novoY);
     }
   };
 
-  this.setY(height / 2);
+  this.setY(alturaJogo / 2);
 }
 
-const obstacleController = new ObstacleController(700, 1200, 200, 400);
-const flappyBird = new Bird(700);
-const gameArea = document.querySelector("[tp-flappy]");
-gameArea.appendChild(flappyBird.element);
-obstacleController.obstacles.forEach((obstacle) =>
-  gameArea.appendChild(obstacle.element)
-);
+function Progresso() {
+  this.elemento = novoElemento("span", "progresso");
 
-setInterval(() => {
-  obstacleController.animate();
-  flappyBird.animate();
-}, 20);
+  this.atualizarPontos = (pontos) => {
+    this.elemento.innerHTML = pontos;
+  };
+  this.atualizarPontos(0);
+}
+
+/*
+const barreiras = new Barreiras(700, 1200, 200, 400)
+const passaro = new Passaro(700)
+const areaDoJogo = document.querySelector('[tp-flappy]')
+
+areaDoJogo.appendChild(new Progresso().elemento)
+areaDoJogo.appendChild(passaro.elemento)
+barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
+
+setInterval( () =>{
+  barreiras.animar()
+  passaro.animar()
+}, 20 ) */
+
+function estaoSobrePostos(elementoA, elementoB) {
+  const a = elementoA.getBoundingClientRect();
+  const b = elementoB.getBoundingClientRect();
+
+  const horizontal = a.left + a.width >= b.left && b.left + b.width >= a.left;
+  const vertical = a.top + a.height >= b.top && b.top + b.height >= a.top;
+
+  return horizontal && vertical;
+}
+
+function colidiu(passaro, barreiras) {
+  let colidiu = false;
+
+  barreiras.pares.forEach((parDeBarreiras) => {
+    if (!colidiu) {
+      const superior = parDeBarreiras.superior.elemento;
+      const inferior = parDeBarreiras.inferior.elemento;
+
+      colidiu =
+        estaoSobrePostos(passaro.elemento, superior) ||
+        estaoSobrePostos(passaro.elemento, inferior);
+    }
+  });
+
+  return colidiu;
+}
+
+function FlappyBird() {
+  let pontos = 0;
+
+  const areaDoJogo = document.querySelector("[tp-flappy]");
+  const altura = areaDoJogo.clientHeight;
+  const largura = areaDoJogo.clientWidth;
+
+  const progresso = new Progresso();
+  const barreiras = new Barreiras(altura, largura, 200, 400, () =>
+    progresso.atualizarPontos(++pontos)
+  );
+
+  const passaro = new Passaro(altura);
+
+  areaDoJogo.appendChild(progresso.elemento);
+  areaDoJogo.appendChild(passaro.elemento);
+
+  barreiras.pares.forEach((par) => areaDoJogo.appendChild(par.elemento));
+
+  this.start = () => {
+    const temporizador = setInterval(() => {
+      barreiras.animar();
+      passaro.animar();
+
+      if (colidiu(passaro, barreiras)) {
+        clearInterval(temporizador);
+      }
+    }, 20);
+  };
+}
+
+new FlappyBird().start();
