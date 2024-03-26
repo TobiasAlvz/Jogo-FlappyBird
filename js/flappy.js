@@ -73,23 +73,43 @@ function ObstacleController(height, width, opening, spacing, notifyScore) {
   };
 }
 
-function bird(height) {
+function Bird(height) {
   let flying = false;
 
   this.element = newElement("img", "bird");
   this.element.src = "imagens/passaro.png";
 
   this.getX = () => parseInt(this.element.style.bottom.split("px")[0]);
-  this.setX = () => (this.element.buttom = `$(y)px`);
+  this.setY = (y) => (this.element.style.bottom = `${y}px`);
+
+  window.onkeydown = (e) => (flying = true);
+  window.onkeyup = (e) => (flying = false);
+
+  this.animate = () => {
+    const newY = this.getX() + (flying ? 8 : -5);
+    const maxHeight = height - this.element.clientHeight;
+
+    if (newY <= 0) {
+      this.setY(0);
+    } else if (newY >= maxHeight) {
+      this.setY(maxHeight);
+    } else {
+      this.setY(newY);
+    }
+  };
+
+  this.setY(height / 2);
 }
 
 const obstacleController = new ObstacleController(700, 1200, 200, 400);
-
+const flappyBird = new Bird(700);
 const gameArea = document.querySelector("[tp-flappy]");
+gameArea.appendChild(flappyBird.element);
 obstacleController.obstacles.forEach((obstacle) =>
   gameArea.appendChild(obstacle.element)
 );
 
 setInterval(() => {
   obstacleController.animate();
+  flappyBird.animate();
 }, 20);
