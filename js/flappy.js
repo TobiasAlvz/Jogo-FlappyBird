@@ -73,6 +73,16 @@ function ObstacleController(height, width, opening, spacing, notifyScore) {
   };
 }
 
+function bird(height) {
+  let flying = false;
+
+  this.element = newElement("img", "bird");
+  this.element.src = "imagens/passaro.png";
+
+  this.getX = () => parseInt(this.element.style.bottom.split("px")[0]);
+  this.setX = () => (this.element.buttom = `$(y)px`);
+}
+
 const obstacleController = new ObstacleController(700, 1200, 200, 400);
 
 const gameArea = document.querySelector("[tp-flappy]");
